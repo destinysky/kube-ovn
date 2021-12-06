@@ -1,0 +1,7 @@
+apiVersion: kubeovn.io/v1
+kind: LogicalPortPair
+metadata:
+  name: lpps1
+spec:
+  podName: nginx
+  weight: 1

@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM centos:8 as ovs-rpm
+FROM centos:8.2.2004 as ovs-rpm
 ENV BUILD_DATE 20200824
 ARG RPM_ARCH
 ARG ARCH
@@ -19,7 +19,7 @@ RUN bash /root/build.sh && \
     rm -rf /ovs /ovn /jemalloc-5.2.1
 
 
-FROM centos:8
+FROM centos:8.2.2004
 ENV BUILD_DATE 20200824
 RUN sed -i s/\$releasever/8-stream/g /etc/yum.repos.d/CentOS-Base.repo && \
     sed -i s/\$releasever/8-stream/g /etc/yum.repos.d/CentOS-AppStream.repo
@@ -49,8 +49,12 @@ ENV KUBE_VERSION="v1.13.2"
 RUN curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/${ARCH}/kubectl -o /usr/bin/kubectl \
  && chmod +x /usr/bin/kubectl
 
-RUN --mount=type=bind,target=/rpms,from=ovs-rpm,source=/rpms rpm -ivh --nodeps /rpms/*.rpm && \
-    sed '/su ovn ovn/d' /etc/logrotate.d/ovn
+COPY --from=ovs-rpm /rpms /rpms
+RUN rpm -ivh --nodeps /rpms/*.rpm && \
+    sed '/su ovn ovn/d' /etc/logrotate.d/ovn && \
+    rm -rf /rpms
+#RUN --mount=type=bind,target=/rpms,from=ovs-rpm,source=/rpms rpm -ivh --nodeps /rpms/*.rpm && \
+#    sed '/su ovn ovn/d' /etc/logrotate.d/ovn
 
 COPY *.sh /kube-ovn/
 COPY grace_stop_ovn_controller /usr/share/ovn/scripts/grace_stop_ovn_controller

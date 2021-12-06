@@ -26,6 +26,8 @@ import (
 type Interface interface {
 	// IPs returns a IPInformer.
 	IPs() IPInformer
+	// LogicalPortPairs returns a LogicalPortPairInformer.
+	LogicalPortPairs() LogicalPortPairInformer
 	// Subnets returns a SubnetInformer.
 	Subnets() SubnetInformer
 	// Vlans returns a VlanInformer.
@@ -46,6 +48,11 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // IPs returns a IPInformer.
 func (v *version) IPs() IPInformer {
 	return &iPInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+}
+
+// LogicalPortPairs returns a LogicalPortPairInformer.
+func (v *version) LogicalPortPairs() LogicalPortPairInformer {
+	return &logicalPortPairInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // Subnets returns a SubnetInformer.

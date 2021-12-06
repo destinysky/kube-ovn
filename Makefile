@@ -1,7 +1,7 @@
 GOFILES_NOVENDOR=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GO_VERSION=1.15
 
-REGISTRY=kubeovn
+REGISTRY=destinysky
 DEV_TAG=dev
 RELEASE_TAG=$(shell cat VERSION)
 
@@ -13,7 +13,7 @@ RPM_ARCH=x86_64
 .PHONY: build-dev-images build-dpdk build-go build-bin lint kind-init kind-init-ha kind-install kind-install-ipv6 kind-reload push-dev push-release e2e ut
 
 build-dev-images: build-bin
-	docker build -t ${REGISTRY}/kube-ovn:${DEV_TAG} -f dist/images/Dockerfile dist/images/
+	sudo docker build --build-arg ARCH=${ARCH} --build-arg RPM_ARCH=${RPM_ARCH} -t ${REGISTRY}/kube-ovn:${DEV_TAG} -f dist/images/Dockerfile dist/images/
 
 build-dpdk:
 	docker buildx build --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache" --platform linux/amd64 -t ${REGISTRY}/kube-ovn-dpdk:19.11-${RELEASE_TAG} -o type=docker -f dist/images/Dockerfile.dpdk1911 dist/images/
@@ -38,7 +38,8 @@ build-go-arm:
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o $(PWD)/dist/images/kube-ovn-speaker -ldflags "-w -s" -v ./cmd/speaker
 
 release: lint build-go
-	docker buildx build --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache" --platform linux/amd64 --build-arg ARCH=amd64 --build-arg RPM_ARCH=x86_64 -t ${REGISTRY}/kube-ovn:${RELEASE_TAG} -o type=docker -f dist/images/Dockerfile dist/images/
+	sudo docker buildx create --use
+	sudo docker buildx build --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache" --platform linux/amd64 --build-arg ARCH=amd64 --build-arg RPM_ARCH=x86_64 -t ${REGISTRY}/kube-ovn:${RELEASE_TAG} -o type=docker -f dist/images/Dockerfile dist/images/
 
 release-arm: lint build-go-arm
 	docker buildx build --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache" --platform linux/arm64 --build-arg ARCH=arm64 --build-arg RPM_ARCH=aarch64 -t ${REGISTRY}/kube-ovn:${RELEASE_TAG} -o type=docker -f dist/images/Dockerfile dist/images/
@@ -53,10 +54,10 @@ lint:
 	@gofmt -d ${GOFILES_NOVENDOR}
 	@gofmt -l ${GOFILES_NOVENDOR} | read && echo "Code differs from gofmt's style" 1>&2 && exit 1 || true
 	@GOOS=linux go vet ./...
-	@GOOS=linux gosec -exclude=G204 ./...
+	@GOOS=linux ./bin/gosec -exclude=G204 ./...
 
 build-bin:
-	docker run --rm -e GOOS=linux -e GOCACHE=/tmp -e GOARCH=${ARCH} -e GOPROXY=https://goproxy.cn \
+	sudo docker run --rm -e GOOS=linux -e GOCACHE=/tmp -e GOARCH=${ARCH} -e GOPROXY=https://goproxy.cn \
 		-u $(shell id -u):$(shell id -g) \
 		-v $(CURDIR):/go/src/github.com/alauda/kube-ovn:ro \
 		-v $(CURDIR)/dist:/go/src/github.com/alauda/kube-ovn/dist/ \

@@ -27,6 +27,7 @@ import (
 type KubeovnV1Interface interface {
 	RESTClient() rest.Interface
 	IPsGetter
+	LogicalPortPairsGetter
 	SubnetsGetter
 	VlansGetter
 }
@@ -38,6 +39,10 @@ type KubeovnV1Client struct {
 
 func (c *KubeovnV1Client) IPs() IPInterface {
 	return newIPs(c)
+}
+
+func (c *KubeovnV1Client) LogicalPortPairs(namespace string) LogicalPortPairInterface {
+	return newLogicalPortPairs(c, namespace)
 }
 
 func (c *KubeovnV1Client) Subnets() SubnetInterface {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -943,5 +944,24 @@ func (c Client) CreateLocalnetPort(ls, port, providerName, vlanID string) error 
 		return err
 	}
 
+	return nil
+}
+
+func (c Client) CreateLogicalPortPair(ls, port, name string, weight int64) error {
+	cmdArg := []string{
+		MayExist, "lsp-pair-add", ls, port, port, name, strconv.FormatInt(weight, 10),
+	}
+	if _, err := c.ovnNbCommand(cmdArg...); err != nil {
+		klog.Errorf("create logical port pair %s failed, %v", name, err)
+		return err
+	}
+
+	return nil
+}
+
+func (c Client) DeleteLogicalPortPair(name string) error {
+	if _, err := c.ovnNbCommand(IfExists, "lsp-pair-del", name); err != nil {
+		return fmt.Errorf("failed to delete logical port pair %s, %v", name, err)
+	}
 	return nil
 }

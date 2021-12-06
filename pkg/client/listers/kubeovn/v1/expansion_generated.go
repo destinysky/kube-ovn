@@ -22,6 +22,14 @@ package v1
 // IPLister.
 type IPListerExpansion interface{}
 
+// LogicalPortPairListerExpansion allows custom methods to be added to
+// LogicalPortPairLister.
+type LogicalPortPairListerExpansion interface{}
+
+// LogicalPortPairNamespaceListerExpansion allows custom methods to be added to
+// LogicalPortPairNamespaceLister.
+type LogicalPortPairNamespaceListerExpansion interface{}
+
 // SubnetListerExpansion allows custom methods to be added to
 // SubnetLister.
 type SubnetListerExpansion interface{}

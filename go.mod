@@ -21,6 +21,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/kubesphere/porter v0.1.1
 	github.com/moul/http2curl v1.0.0 // indirect
+	github.com/nbutton23/zxcvbn-go v0.0.0-20210217022336-fa2cb2858354 // indirect
 	github.com/neverlee/keymutex v0.0.0-20171121013845-f593aa834bf9
 	github.com/oilbeater/go-ping v0.0.0-20200413021620-332b7197c5b5
 	github.com/onsi/ginkgo v1.12.0
@@ -33,15 +34,21 @@ require (
 	github.com/projectcalico/go-yaml-wrapper v0.0.0-20161127220527-598e54215bee // indirect
 	github.com/projectcalico/libcalico-go v0.0.0-20190305235709-3d935c3b8b86 // indirect
 	github.com/prometheus/client_golang v1.1.0
+	github.com/securego/gosec v0.0.0-20200401082031-e946c8c39989 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.3 // indirect
 	github.com/stretchr/testify v1.5.1
 	github.com/vishvananda/netlink v1.1.0
+	golang.org/x/mod v0.5.1 // indirect
+	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
+	golang.org/x/tools v0.1.7 // indirect
 	google.golang.org/grpc v1.23.0
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/api v0.0.0-20190703205437-39734b2a72fe
 	k8s.io/apimachinery v0.0.0-20190703205208-4cfb76a8bf76
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
+	k8s.io/code-generator v0.17.2
 	k8s.io/klog v1.0.0
 	k8s.io/sample-controller v0.0.0-20190326030654-b8f621986e45
 	k8s.io/utils v0.0.0-20190607212802-c55fbcfc754a // indirect

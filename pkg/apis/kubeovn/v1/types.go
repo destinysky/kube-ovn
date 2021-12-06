@@ -193,3 +193,28 @@ type VlanList struct {
 
 	Items []Vlan `json:"items"`
 }
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +genclient:noStatus
+
+type LogicalPortPair struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec LogicalPortPairSpec `json:"spec"`
+}
+
+type LogicalPortPairSpec struct {
+	PodName string `json:"podName"`
+	Weight  int64  `json:"weight"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type LogicalPortPairList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata"`
+
+	Items []LogicalPortPair `json:"items"`
+}
