@@ -356,13 +356,15 @@ spec:
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: logicalportpairs.kubeovn.io
+  name: servicefunctionchains.kubeovn.io
 spec:
   group: kubeovn.io
   versions:
     - name: v1
       served: true
       storage: true
+      subresources:
+        status: {}
       schema:
         openAPIV3Schema:
           type: object
@@ -370,25 +372,87 @@ spec:
             spec:
               type: object
               properties:
-                podName:
+                match:
+                  type: object
+                  properties:
+                    priority:
+                      type: integer
+                      format: int64
+                    sourcePod:
+                      type: string
+                    destinationPod:
+                      type: string
+                    sourceIP:
+                      type: string
+                    destinationIP:
+                      type: string
+                    sourcePort:
+                      type: integer
+                      format: int32
+                    destinationPort:
+                      type: integer
+                      format: int32
+                    protocol:
+                      type: string
+                    sourceMAC:
+                      type: string
+                    destinationMAC:
+                      type: string
+                    others:
+                      type: string
+                  required:
+                  - sourcePod
+                  - destinationPod
+                chain:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      portGroup:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - podName
+                          properties:
+                            podName:
+                              type: string
+                            weight:
+                              type: integer
+                              format: int64
+            status:
+              type: object
+              properties:
+                switchName:
                   type: string
-                weight:
-                  format: int64
-                  type: integer
+                chainName:
+                  type: string
+                logicalPortPairGroupNames:
+                  type: array
+                  items:
+                    type: string
+                logicalPortPairNames:
+                  type: array
+                  items:
+                    type: string
       additionalPrinterColumns:
-      - name: PodName
+      - name: Namespace
         type: string
-        jsonPath: .spec.PodName
-      - name: Weight
-        type: integer
-        jsonPath: .spec.Weight
+        jsonPath: .metadata.namespace
+        priority: 0
+      - name: LocatedSwitch
+        type: string
+        jsonPath: .status.switchName
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
   scope: Namespaced
   names:
-    plural: logicalportpairs
-    singular: logicalportpair
-    kind: LogicalPortPair
+    plural: servicefunctionchains
+    singular: servicefunctionchain
+    kind: ServiceFunctionChain
     shortNames:
-      - lpp
+      - sfc
 EOF
 
 if $DPDK; then
@@ -456,7 +520,8 @@ rules:
       - subnets/status
       - ips
       - vlans
-      - logicalportpairs
+      - servicefunctionchains
+      - servicefunctionchains/status
     verbs:
       - "*"
   - apiGroups:
@@ -882,7 +947,8 @@ rules:
       - ips
       - vlans
       - networks
-      - logicalportpairs
+      - servicefunctionchains
+      - servicefunctionchains/status
     verbs:
       - "*"
   - apiGroups:
@@ -1291,6 +1357,7 @@ spec:
           - --network-type=$NETWORK_TYPE
           - --default-interface-name=$VLAN_INTERFACE_NAME
           - --default-vlan-id=$VLAN_ID
+          - --v=3
           env:
             - name: ENABLE_SSL
               value: "$ENABLE_SSL"
@@ -1791,6 +1858,7 @@ vsctl(){
 diagnose(){
   kubectl get crd subnets.kubeovn.io
   kubectl get crd ips.kubeovn.io
+  kubectl get crd servicefunctionchains.kubeovn.io
   kubectl get svc kube-dns -n kube-system
   kubectl get svc kubernetes -n default
 

@@ -20,7 +20,7 @@ package v1
 
 type IPExpansion interface{}
 
-type LogicalPortPairExpansion interface{}
+type ServiceFunctionChainExpansion interface{}
 
 type SubnetExpansion interface{}
 

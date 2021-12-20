@@ -965,3 +965,72 @@ func (c Client) DeleteLogicalPortPair(name string) error {
 	}
 	return nil
 }
+
+func (c Client) CreateLogicalPortChain(ls, name string) error {
+	cmdArg := []string{
+		MayExist, "lsp-chain-add", ls, name,
+	}
+	if _, err := c.ovnNbCommand(cmdArg...); err != nil {
+		klog.Errorf("create logical port chain %s failed, %v", name, err)
+		return err
+	}
+
+	return nil
+}
+
+func (c Client) DeleteLogicalPortChain(name string) error {
+	if _, err := c.ovnNbCommand(IfExists, "lsp-chain-del", name); err != nil {
+		return fmt.Errorf("failed to delete logical port chain %s, %v", name, err)
+	}
+	return nil
+}
+
+func (c Client) AddToLogicalPortPairGroup(pair_group, lpp string) error {
+	cmdArg := []string{
+		MayExist, "lsp-pair-group-add-port-pair", pair_group, lpp,
+	}
+	if _, err := c.ovnNbCommand(cmdArg...); err != nil {
+		klog.Errorf("Add port pair %s to logical port pair group %s failed, %v", lpp, pair_group, err)
+		return err
+	}
+
+	return nil
+}
+
+func (c Client) DeleteLogicalPortPairGroup(name string) error {
+	if _, err := c.ovnNbCommand(IfExists, "lsp-pair-group-del", name); err != nil {
+		return fmt.Errorf("failed to delete logical port pair group %s, %v", name, err)
+	}
+	return nil
+}
+
+func (c Client) AddToLogicalPortChain(lpc, pair_group string) error {
+	cmdArg := []string{
+		MayExist, "lsp-pair-group-add", lpc, pair_group,
+	}
+	if _, err := c.ovnNbCommand(cmdArg...); err != nil {
+		klog.Errorf("Add logical port pair group %s to chain %s failed, %v", pair_group, lpc, err)
+		return err
+	}
+
+	return nil
+}
+
+func (c Client) AddChainClassifier(ls, chain, match, entry_port, exit_port, name, priority string) error {
+	cmdArg := []string{
+		MayExist, "lsp-chain-classifier-add", ls, chain, match, entry_port, exit_port, name, priority,
+	}
+	if _, err := c.ovnNbCommand(cmdArg...); err != nil {
+		klog.Errorf("Add logical port chain classifier of chain %s failed, %v", name, err)
+		return err
+	}
+
+	return nil
+}
+
+func (c Client) DeleteChainClassifier(name string) error {
+	if _, err := c.ovnNbCommand(IfExists, "lsp-chain-classifier-del", name); err != nil {
+		return fmt.Errorf("failed to delete logical port chain classifier %s, %v", name, err)
+	}
+	return nil
+}

@@ -1,0 +1,24 @@
+apiVersion: kubeovn.io/v1
+kind: ServiceFunctionChain
+metadata:
+  name: sfc-sample
+spec:
+  match:
+    priority: 1
+    sourcePod: "sender"
+    destinationPod: "receiver"
+    sourceIP: "10.16.0.8"
+    destinationIP: "10.16.0.9"
+    sourcePort: 0
+    destinationPort: 0
+    protocol: "udp"
+    sourceMAC: ""
+    destinationMAC: ""
+    others: ""
+  chain:
+    - portGroup:
+      - podName: "vnf1"
+        weight: 1
+    - portGroup:
+      - podName: "vnf2"
+        weight: 1

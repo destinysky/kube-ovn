@@ -32,8 +32,8 @@ func (c *FakeKubeovnV1) IPs() v1.IPInterface {
 	return &FakeIPs{c}
 }
 
-func (c *FakeKubeovnV1) LogicalPortPairs(namespace string) v1.LogicalPortPairInterface {
-	return &FakeLogicalPortPairs{c, namespace}
+func (c *FakeKubeovnV1) ServiceFunctionChains(namespace string) v1.ServiceFunctionChainInterface {
+	return &FakeServiceFunctionChains{c, namespace}
 }
 
 func (c *FakeKubeovnV1) Subnets() v1.SubnetInterface {

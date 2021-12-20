@@ -196,25 +196,55 @@ type VlanList struct {
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +genclient:noStatus
 
-type LogicalPortPair struct {
+type ServiceFunctionChain struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec LogicalPortPairSpec `json:"spec"`
+	Spec   ServiceFunctionChainSpec   `json:"spec"`
+	Status ServiceFunctionChainStatus `json:"status,omitempty"`
 }
 
-type LogicalPortPairSpec struct {
+type ServiceFunctionChainSpec struct {
+	Match MatchField             `json:"match"`
+	Chain []LogicalPortPairGroup `json:"chain"`
+}
+
+type MatchField struct {
+	Priority        int64  `json:"priority"` //0...32767 default 0
+	SourcePod       string `json:"sourcePod"`
+	DestinationPod  string `json:"destinationPod"`
+	SourceIP        string `json:"sourceIP"`        // ipv4
+	DestinationIP   string `json:"destinationIP"`   // ipv4
+	SourcePort      uint16 `json:"sourcePort"`      // 0 means all match
+	DestinationPort uint16 `json:"destinationPort"` // 0 means all match
+	Protocol        string `json:"protocol"`        // tcp, udp, sctp
+	SourceMAC       string `json:"sourceMAC"`
+	DestinationMAC  string `json:"destinationMAC"`
+	Others          string `json:"others"` // Ref:https://man7.org/linux/man-pages/man5/ovn-sb.5.html
+}
+
+type LogicalPortPairGroup struct {
+	PortPairs []LogicalPortPair `json:"portGroup"`
+}
+
+type LogicalPortPair struct {
 	PodName string `json:"podName"`
 	Weight  int64  `json:"weight"`
 }
 
+type ServiceFunctionChainStatus struct {
+	SwitchName                string   `json:"switchName"`
+	ChainName                 string   `json:"chainName"`
+	LogicalPortPairGroupNames []string `json:"logicalPortPairGroupNames"`
+	LogicalPortPairNames      []string `json:"logicalPortPairNames"`
+}
+
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type LogicalPortPairList struct {
+type ServiceFunctionChainList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
 
-	Items []LogicalPortPair `json:"items"`
+	Items []ServiceFunctionChain `json:"items"`
 }

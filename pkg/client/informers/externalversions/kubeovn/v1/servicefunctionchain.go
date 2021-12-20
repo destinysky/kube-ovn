@@ -31,59 +31,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// LogicalPortPairInformer provides access to a shared informer and lister for
-// LogicalPortPairs.
-type LogicalPortPairInformer interface {
+// ServiceFunctionChainInformer provides access to a shared informer and lister for
+// ServiceFunctionChains.
+type ServiceFunctionChainInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1.LogicalPortPairLister
+	Lister() v1.ServiceFunctionChainLister
 }
 
-type logicalPortPairInformer struct {
+type serviceFunctionChainInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewLogicalPortPairInformer constructs a new informer for LogicalPortPair type.
+// NewServiceFunctionChainInformer constructs a new informer for ServiceFunctionChain type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewLogicalPortPairInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredLogicalPortPairInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewServiceFunctionChainInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredServiceFunctionChainInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredLogicalPortPairInformer constructs a new informer for LogicalPortPair type.
+// NewFilteredServiceFunctionChainInformer constructs a new informer for ServiceFunctionChain type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredLogicalPortPairInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredServiceFunctionChainInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.KubeovnV1().LogicalPortPairs(namespace).List(options)
+				return client.KubeovnV1().ServiceFunctionChains(namespace).List(options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.KubeovnV1().LogicalPortPairs(namespace).Watch(options)
+				return client.KubeovnV1().ServiceFunctionChains(namespace).Watch(options)
 			},
 		},
-		&kubeovnv1.LogicalPortPair{},
+		&kubeovnv1.ServiceFunctionChain{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *logicalPortPairInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredLogicalPortPairInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *serviceFunctionChainInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredServiceFunctionChainInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *logicalPortPairInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&kubeovnv1.LogicalPortPair{}, f.defaultInformer)
+func (f *serviceFunctionChainInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&kubeovnv1.ServiceFunctionChain{}, f.defaultInformer)
 }
 
-func (f *logicalPortPairInformer) Lister() v1.LogicalPortPairLister {
-	return v1.NewLogicalPortPairLister(f.Informer().GetIndexer())
+func (f *serviceFunctionChainInformer) Lister() v1.ServiceFunctionChainLister {
+	return v1.NewServiceFunctionChainLister(f.Informer().GetIndexer())
 }

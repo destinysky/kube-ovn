@@ -26,8 +26,8 @@ import (
 type Interface interface {
 	// IPs returns a IPInformer.
 	IPs() IPInformer
-	// LogicalPortPairs returns a LogicalPortPairInformer.
-	LogicalPortPairs() LogicalPortPairInformer
+	// ServiceFunctionChains returns a ServiceFunctionChainInformer.
+	ServiceFunctionChains() ServiceFunctionChainInformer
 	// Subnets returns a SubnetInformer.
 	Subnets() SubnetInformer
 	// Vlans returns a VlanInformer.
@@ -50,9 +50,9 @@ func (v *version) IPs() IPInformer {
 	return &iPInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// LogicalPortPairs returns a LogicalPortPairInformer.
-func (v *version) LogicalPortPairs() LogicalPortPairInformer {
-	return &logicalPortPairInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// ServiceFunctionChains returns a ServiceFunctionChainInformer.
+func (v *version) ServiceFunctionChains() ServiceFunctionChainInformer {
+	return &serviceFunctionChainInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // Subnets returns a SubnetInformer.

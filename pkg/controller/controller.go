@@ -95,11 +95,11 @@ type Controller struct {
 	kubeovnInformerFactory kubeovninformer.SharedInformerFactory
 	elector                *leaderelection.LeaderElector
 
-	lppsLister     kubeovnlister.LogicalPortPairLister
-	lppSynced      cache.InformerSynced
-	addLppQueue    workqueue.RateLimitingInterface
-	updateLppQueue workqueue.RateLimitingInterface
-	deleteLppQueue workqueue.RateLimitingInterface
+	sfcsLister     kubeovnlister.ServiceFunctionChainLister
+	sfcSynced      cache.InformerSynced
+	addSfcQueue    workqueue.RateLimitingInterface
+	updateSfcQueue workqueue.RateLimitingInterface
+	deleteSfcQueue workqueue.RateLimitingInterface
 }
 
 // NewController returns a new ovn controller
@@ -134,7 +134,7 @@ func NewController(config *Configuration) *Controller {
 	endpointInformer := informerFactory.Core().V1().Endpoints()
 	npInformer := informerFactory.Networking().V1().NetworkPolicies()
 	configMapInformer := cmInformerFactory.Core().V1().ConfigMaps()
-	logicalPortPairsInformer := kubeovnInformerFactory.Kubeovn().V1().LogicalPortPairs()
+	serviceFunctionChainInformer := kubeovnInformerFactory.Kubeovn().V1().ServiceFunctionChains()
 
 	controller := &Controller{
 		config:    config,
@@ -198,11 +198,11 @@ func NewController(config *Configuration) *Controller {
 		cmInformerFactory:      cmInformerFactory,
 		kubeovnInformerFactory: kubeovnInformerFactory,
 
-		lppsLister:     logicalPortPairsInformer.Lister(),
-		lppSynced:      logicalPortPairsInformer.Informer().HasSynced,
-		addLppQueue:    workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "AddLpp"),
-		updateLppQueue: workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "UpdateLpp"),
-		deleteLppQueue: workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "DeleteLpp"),
+		sfcsLister:     serviceFunctionChainInformer.Lister(),
+		sfcSynced:      serviceFunctionChainInformer.Informer().HasSynced,
+		addSfcQueue:    workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "AddSfc"),
+		updateSfcQueue: workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "UpdateSfc"),
+		deleteSfcQueue: workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "DeleteSfc"),
 	}
 
 	podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -257,10 +257,10 @@ func NewController(config *Configuration) *Controller {
 		UpdateFunc: controller.enqueueUpdateVlan,
 	})
 
-	logicalPortPairsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc:    controller.enqueueAddLpp,
-		DeleteFunc: controller.enqueueDeleteLpp,
-		UpdateFunc: controller.enqueueUpdateLpp,
+	serviceFunctionChainInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    controller.enqueueAddSfc,
+		DeleteFunc: controller.enqueueDeleteSfc,
+		UpdateFunc: controller.enqueueUpdateSfc,
 	})
 
 	return controller
@@ -336,9 +336,9 @@ func (c *Controller) shutdown() {
 	c.delVlanQueue.ShutDown()
 	c.updateVlanQueue.ShutDown()
 
-	c.addLppQueue.ShutDown()
-	c.deleteLppQueue.ShutDown()
-	c.updateLppQueue.ShutDown()
+	c.addSfcQueue.ShutDown()
+	c.deleteSfcQueue.ShutDown()
+	c.updateSfcQueue.ShutDown()
 }
 
 func (c *Controller) startWorkers(stopCh <-chan struct{}) {
@@ -388,9 +388,9 @@ func (c *Controller) startWorkers(stopCh <-chan struct{}) {
 	// run in a single worker to avoid subnet cidr conflict
 	go wait.Until(c.runAddNamespaceWorker, time.Second, stopCh)
 
-	go wait.Until(c.runAddLppWorker, time.Second, stopCh)
-	go wait.Until(c.runDeleteLppWorker, time.Second, stopCh)
-	go wait.Until(c.runUpdateLppWorker, time.Second, stopCh)
+	go wait.Until(c.runAddSfcWorker, time.Second, stopCh)
+	go wait.Until(c.runDeleteSfcWorker, time.Second, stopCh)
+	go wait.Until(c.runUpdateSfcWorker, time.Second, stopCh)
 
 	// run in a single worker to avoid delete the last vip, which will lead ovn to delete the loadbalancer
 	go wait.Until(c.runDeleteTcpServiceWorker, time.Second, stopCh)
